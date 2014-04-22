@@ -1,19 +1,10 @@
 CSV Table Scripts
 =================
 
-* Data.CSV.Table.Types
-  + `Table`
-  + `Row`
-  + `Col`
-  + parse   :: `FilePath -> IO Table`
-  
-* Data.CSV.Table.Utils
-  + forRow    :: `Table -> (Row    -> IO ()) -> IO ()`
-  + isUnique  :: `Table -> Col     -> Bool`
-  + joinBy    :: `Col   -> Table   -> Table -> Table`
-  + average   :: `Col   -> Table   -> Int`
-  + addCol    :: `Table -> Formula -> Table`
-  + email     :: `Table -> [Col]`
-  + sortBy    :: `Col   -> Table   -> Table`
-  + mailRow   :: `Table -> (Row -> Email) -> IO ()`
+A collection of scripts to manipulate CSV tables, including:
+
+* `join`, `joinBy` : joining two tables by a particular column,
+* `sortBy`         : sorting a table by a particular column,
+* `email`          : emailing the contents of each row to an address in the row,
+* `project`        : restricting a table to a particular set of columns
 

@@ -4,7 +4,8 @@ module Data.CSV.Table.Types (
   -- * Representation
     Table (..)
   , Row (..)
-  , Col (..)
+  , Col (..) 
+  , RowInfo 
 
   -- * Accessors
   , getCols
@@ -26,8 +27,9 @@ import           Data.Maybe
 import           Data.List (sort, elemIndex)
 import qualified Data.Map.Strict as M
 
-newtype Col = C Field   deriving (Eq, Ord, Show)
-newtype Row = R [Field] deriving (Eq, Ord, Show)
+newtype Col  = C Field   deriving (Eq, Ord, Show)
+newtype Row  = R [Field] deriving (Eq, Ord, Show)
+type RowInfo = [(Col, Field)]
 
 -----------------------------------------------------------------------------------
 -- | Types
@@ -48,9 +50,9 @@ getCols t = [c | C c <- cols t]
 {-@ getRows   :: t:Table -> ListN Field {(dim t)} @-}
 getRows t = [r | R r <- body t]
 
------------------------------------------------------------------------------------
+----------------------------------------------------------------------
 -- | Converting to CSV 
------------------------------------------------------------------------------------
+----------------------------------------------------------------------
 
 fromCSV        :: CSV -> Table
 fromCSV []     = error "fromCSV: Empty CSV with no rows!"

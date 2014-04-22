@@ -10,7 +10,7 @@ module Data.CSV.Table.Ops (
   , project
   , project1
   , moveColL
-
+  , mapRows
   ) where
 
 import           Text.CSV
@@ -124,21 +124,14 @@ sortBy t c = t { body = [ R fs | (_, fs) <- M.toList $ indexBy t c] }
 -- | Map a function over all rows of a table
 -------------------------------------------------------------------
 
-mapRows   :: ([(Field, Field)] -> a) -> Table -> [a]
+mapRows   :: (RowInfo -> a) -> Table -> [a]
 mapRows f = map f . rowCols   
 
-rowCols   :: Table -> [[(Field, Field)]]
+rowCols   :: Table -> [RowInfo]
 rowCols t = [zip cs r | r <- rs]
   where
-    cs    = getCols t
+    cs    = cols    t
     rs    = getRows t
-
-average   :: Col -> Table -> Int
-average   = undefined
-
--- addCol    :: Table -> Formula -> Table
--- addCol    = undefined
-
 
 -------------------------------------------------------------------
 -- | Helpers
