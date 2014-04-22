@@ -1,4 +1,9 @@
-csv-table
-=========
+CSV Table Scripts
+=================
 
-Scripts for manipulating tables stored as CSV files
+
+* Data.CSV.Table.Types
+* Data.CSV.Table.Parse
+* Data.CSV.Table.Ops
+
+
