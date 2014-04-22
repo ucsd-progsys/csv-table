@@ -5,16 +5,15 @@ CSV Table Scripts
   + `Table`
   + `Row`
   + `Col`
-
-* Data.CSV.Table.Parse
   + parse   :: `FilePath -> IO Table`
   
 * Data.CSV.Table.Utils
-  + forRow  :: `Table -> (Row -> IO ()) -> IO ()`
-  + joinBy  :: `Col   -> Table   -> Table -> Table`
-  + average :: `Col   -> Table   -> Int`
-  + addCol  :: `Table -> Formula -> Table`
-  + email   :: `Table -> [Col]`
-  + sortBy  :: `Col   -> Table   -> Table`
-  + mailRow :: `Table -> (Row -> Email) -> IO ()`
+  + forRow    :: `Table -> (Row    -> IO ()) -> IO ()`
+  + isUnique  :: `Table -> Col     -> Bool`
+  + joinBy    :: `Col   -> Table   -> Table -> Table`
+  + average   :: `Col   -> Table   -> Int`
+  + addCol    :: `Table -> Formula -> Table`
+  + email     :: `Table -> [Col]`
+  + sortBy    :: `Col   -> Table   -> Table`
+  + mailRow   :: `Table -> (Row -> Email) -> IO ()`
 

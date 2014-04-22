@@ -11,10 +11,14 @@ module Data.CSV.Table.Types (
   , getRows
 
   -- * Parsing 
-  , fromString
+  , fromFile
+
+  -- * Saving
+  , toFile 
 
   ) where
 
+import           Text.Printf
 import           Text.CSV
 import           System.FilePath
 import           Control.Applicative ((<$>))
@@ -48,18 +52,22 @@ getRows t = [r | R r <- body t]
 -- | Converting to CSV 
 -----------------------------------------------------------------------------------
 
-fromCSV        :: CSV -> Either String Table
-fromCSV []     = Left  "Empty CSV with no rows!"
-fromCSV (r:rs) = do let n  = length r
-                    let cs = [C x | x <- r]
-                    b     <- mapM (makeRow n) rs                        
-                    Right  $ T n cs b 
+fromCSV        :: CSV -> Table
+fromCSV []     = error "fromCSV: Empty CSV with no rows!"
+fromCSV (r:rs) = T n cs b 
+  where
+    n          = length r
+    cs         = [C x | x <- r]
+    b          = mapMaybe (makeRow n) $ zip [0..] rs                        
 
-makeRow            :: Int -> Record -> Either String Row
-makeRow n xs 
-  | length xs == n = Right $ R xs
-  | otherwise      = Left  $ "Row: " ++ show xs ++ "does not have " ++ show n ++ "columns!"
+makeRow :: Int -> (Int, Record) -> Maybe Row
+makeRow n (i, xs) 
+  | length xs == n = Just $ R xs
+  | empty xs       = Nothing 
+  | otherwise      = error $ printf "Row %d does not have %d columns:\n%s" i n (show xs)
 
+empty :: Record -> Bool
+empty = null . unwords
 
 toCSV   :: Table -> CSV
 toCSV t = [c | C c <- cols t] : [xs | R xs <- body t] 
@@ -68,18 +76,24 @@ toCSV t = [c | C c <- cols t] : [xs | R xs <- body t]
 -- | Parsing 
 -------------------------------------------------------------------
 
-fromString      :: FilePath -> String -> Either String Table
-fromString fp s = fromCSV =<< parseCSV' fp s
+toFile   :: FilePath -> Table -> IO ()
+toFile f = writeFile f . show
+
+fromFile    :: FilePath -> IO Table
+fromFile  f = fromString f <$> readFile f
+
+fromString      :: FilePath -> String -> Table
+fromString fp s = fromCSV $ parseCSV' fp s
 
 parseCSV' fp s = case parseCSV fp s of 
-                   Right c -> Right c
-                   Left e  -> Left (show e)
+                   Right c -> c
+                   Left e  -> error $ printf "parseCSV': %s" (show e)
 
 -------------------------------------------------------------------
 -- | Printing
 -------------------------------------------------------------------
 
 instance Show Table where
-  show = show . toCSV
+  show = printCSV . toCSV
 
 
