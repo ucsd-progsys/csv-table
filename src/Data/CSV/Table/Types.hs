@@ -10,6 +10,7 @@ module Data.CSV.Table.Types (
   -- * Accessors
   , getCols
   , getRows
+  , lookupCol
 
   -- * Parsing 
   , fromFile
@@ -50,6 +51,11 @@ getCols t = [c | C c <- cols t]
 {-@ getRows   :: t:Table -> ListN Field {(dim t)} @-}
 getRows t = [r | R r <- body t]
 
+lookupCol :: Col -> RowInfo -> Field
+lookupCol c cxs = fromMaybe err $ lookup c cxs
+  where
+    err         = printf "lookupCol: cannot find %s in %s" (show c) (show cxs) 
+ 
 ----------------------------------------------------------------------
 -- | Converting to CSV 
 ----------------------------------------------------------------------

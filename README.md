@@ -8,3 +8,6 @@ A collection of scripts to manipulate CSV tables, including:
 * `email`          : emailing the contents of each row to an address in the row,
 * `project`        : restricting a table to a particular set of columns
 
+
+
+
