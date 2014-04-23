@@ -37,9 +37,10 @@ sendMail e = do
 
 mailCmd :: Email -> String
 mailCmd e = 
-    printf "mail -s \"%s\" -aFrom:%s %s -c %s < %s" (subject e) (sender e) (to e) (ccs e) (uid e)
+    printf "mail -s \"%s\" -aFrom:%s %s %s < %s" (subject e) (sender e) (to e) (ccs $ cc e) (uid e)
   where
-    ccs = intercalate "," . cc
+    ccs [] = ""
+    ccs xs = "-c " ++ intercalate "," xs
 
 
 

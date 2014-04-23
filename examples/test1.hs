@@ -10,9 +10,8 @@ csvFromFile f = parseCSVFromFile f >>= either (error . show) return
 
 
 main = do 
-  joinTest "examples/tab1.csv" 
-           "examples/tab2.csv" 
-           "examples/tab3.csv"
+  -- joinTest  "examples/tab1.csv" "examples/tab2.csv" "examples/tab3.csv"
+  emailTest "examples/tabe.csv"
 
 ----------------------------------------------------------
 -- | Joining Two Tables
@@ -26,9 +25,6 @@ joinTest f1 f2 f = do
 ----------------------------------------------------------
 -- | Email Test
 ----------------------------------------------------------
-
--- emailTest f = mapRows makeEmail <$> fromFile f
-     -- send t makeEmail 
 
 emailTest f = do 
   t <- fromFile f
