@@ -31,9 +31,9 @@ sendMail1 :: Email -> IO ()
 sendMail1 e = do
   let tmp  = uid e
   let cmd  = mailCmd e 
-  writeFile tmp (text e)  
-  status  <- system cmd 
-  putStrLn $ printf "[exec: %s] Status[%s]: %s %s" cmd (show status) (uid e) (to e)
+  writeFile tmp (text e)
+  status  <- if (send e) then show `fmap` system cmd else return "FAKESEND"
+  putStrLn $ printf "[exec: %s] Status[%s]: %s %s" cmd (status) (uid e) (to e)
 
 mailCmd :: Email -> String
 mailCmd e = 
@@ -41,10 +41,6 @@ mailCmd e =
   where
     ccs [] = ""
     ccs xs = "-c " ++ intercalate "," xs
-
-
-
-
 
 
 

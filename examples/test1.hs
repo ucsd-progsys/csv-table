@@ -11,7 +11,7 @@ csvFromFile f = parseCSVFromFile f >>= either (error . show) return
 
 main = do 
   -- joinTest  "examples/tab1.csv" "examples/tab2.csv" "examples/tab3.csv"
-  emailTest "examples/tabe.csv"
+  emailTest True "examples/tabe.csv"
 
 ----------------------------------------------------------
 -- | Joining Two Tables
@@ -26,18 +26,18 @@ joinTest f1 f2 f = do
 -- | Email Test
 ----------------------------------------------------------
 
-emailTest f = do 
+emailTest b f = do 
   t <- fromFile f
-  send t makeEmail
+  sendMail t (makeEmail b)
 
-makeEmail r = E {
+makeEmail b r = E {
     uid       = "/tmp/email." ++ lookupCol (C "PID") r
   , to        = lookupCol (C "EMAIL") r
   , cc        = []
   , sender    = "santa.claus@gmail.com"
   , subject   = "ho ho ho"
   , text      = makeText r 
-  , send      = True
+  , send      = b 
   }
 
 makeText r = printf "ID=%s: %s eats on %s at %s"
