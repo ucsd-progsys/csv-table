@@ -37,6 +37,7 @@ makeEmail r = E {
   , sender    = "santa.claus@gmail.com"
   , subject   = "ho ho ho"
   , text      = makeText r 
+  , send      = True
   }
 
 makeText r = printf "ID=%s: %s eats on %s at %s"

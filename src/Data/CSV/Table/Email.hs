@@ -3,8 +3,7 @@ module Data.CSV.Table.Email
     Email (..)
     
     -- * Send function
-    , send 
-    , sendMail
+    , sendMail 
 
    ) where
 
@@ -22,13 +21,14 @@ data Email   = E { uid     :: String
                  , sender  :: String
                  , subject :: String
                  , text    :: String
+                 , send    :: Bool 
                  } deriving (Show)
 
-send      :: Table -> (RowInfo -> Email) -> IO ()
-send t f  = forM_ (mapRows f t) sendMail 
+sendMail      :: Table -> (RowInfo -> Email) -> IO ()
+sendMail t f  = forM_ (mapRows f t) sendMail1 
 
-sendMail :: Email -> IO ()
-sendMail e = do
+sendMail1 :: Email -> IO ()
+sendMail1 e = do
   let tmp  = uid e
   let cmd  = mailCmd e 
   writeFile tmp (text e)  

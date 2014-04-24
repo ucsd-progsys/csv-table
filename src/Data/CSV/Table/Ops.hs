@@ -2,14 +2,28 @@
 module Data.CSV.Table.Ops (
 
   -- * Core Operators
-    join
-  , index
-  , joinBy
-  , indexBy
+    join, joinBy
+  
+  -- * Join using default row for missing keys 
+  , padJoin, padJoinBy
+
+  -- * Difference of two tables
+  , diff, diffBy
+  
+  -- * Index a table by a key
+  , index, indexBy
+ 
+  -- * Order by the values of a particular column 
   , sortBy
+  
+  -- * Restrict table to a subset of columns
   , project
   , project1
+  
+  -- * Move a column to first (leftmost) position
   , moveColL
+
+  -- * Map a function over all rows
   , mapRows
   ) where
 
@@ -66,6 +80,54 @@ joinBy c t1 t2 = join t1' t2'
   where 
     t1'        = moveColL t1 c 
     t2'        = moveColL t2 c
+
+--------------------------------------------------------------------
+-- | Differences of two tables by first column
+-------------------------------------------------------------------
+
+diff :: Table -> Table -> Table
+diff t1@(T n1 c1 b1) t2 = T n1 c1 b1'
+  where 
+    m1     = index t1
+    m2     = index t2
+    m1'    = M.difference m1 m2  
+    b1'    = R <$> M.elems m1'
+
+--------------------------------------------------------------------
+-- | Differences of two tables by any column
+-------------------------------------------------------------------
+
+diffBy :: Col -> Table -> Table -> Table
+diffBy c t1 t2 = diff t1' t2'
+  where 
+    t1'        = moveColL t1 c 
+    t2'        = moveColL t2 c
+
+
+--------------------------------------------------------------------
+-- | Join two tables by first column, using default row for missing keys 
+-------------------------------------------------------------------
+
+padJoin :: Row -> Table -> Table -> Table
+padJoin (R xs) t1 t2 = T n' cs b'
+  where
+    m1     = index t1
+    m2     = index t2
+    m1'    = M.difference m1 m2
+    m2'    = M.mapWithKey (\k _ -> k:xs) m1
+    m'     = M.intersectionWith (\r1 r2 -> r1 ++ tail r2) m1 (M.union m2 m2')
+    b'     = R <$> M.elems m'
+    n'     = dim t1 + dim t2 - 1
+    cs     = (cols t1) ++ (tail $ cols t2)
+
+--------------------------------------------------------------------
+-- | Join two tables by any unique column, using default row for missing keys 
+-------------------------------------------------------------------
+
+padJoinBy c r t1 t2 = padJoin r t1' t2'
+  where
+    t1'             = moveColL t1 c
+    t2'             = moveColL t2 c
 
 ------------------------------------------------------------------
 --- | Index table by any column 
