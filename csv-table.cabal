@@ -6,7 +6,7 @@ version:             0.1.0.0
 synopsis:            Scripts for manipulating tables stored as CSV files
 -- description:         
 homepage:            https://github.com/ucsd-progsys/csv-table
-license:             BSD3
+license:             MIT 
 license-file:        LICENSE
 author:              Ranjit Jhala
 maintainer:          jhala@cs.ucsd.edu
@@ -18,7 +18,7 @@ cabal-version:       >=1.10
 
 Library 
   hs-source-dirs:      src 
-  build-depends:       base >=4.6 && <4.7, 
+  build-depends:       base,
                        csv, 
                        containers, 
                        filepath,
