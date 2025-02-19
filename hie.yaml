@@ -1,0 +1,6 @@
+cradle:
+  stack:
+    - path: "./src"
+      component: "csv-table:lib"
+    - path: "./examples"
+      component: "csv-table:lib"

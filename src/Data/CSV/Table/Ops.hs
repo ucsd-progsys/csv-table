@@ -13,6 +13,7 @@ module Data.CSV.Table.Ops (
   -- * Index a table by a key
   , index
   , indexBy
+  , uniqueBy
 
   -- * Order by the values of a particular column
   , sortBy
@@ -28,7 +29,6 @@ module Data.CSV.Table.Ops (
   -- * Map a function over all rows
   , mapRows
   , newColumn
-
 
   ) where
 
@@ -72,11 +72,13 @@ moveColL t@(T n cs b) c
   where
      i        = columnIndex t c
 
+pluck :: Int -> [a] -> [a]
 pluck              = go []
   where
     go ls 0 (r:rs) = r : (ls +++ rs)
     go ls n (r:rs) = go (r:ls) (n-1) rs
 
+(+++) :: [a] -> [a] -> [a]
 []     +++ ys = ys
 (x:xs) +++ ys = xs +++ (x:ys)
 
@@ -89,13 +91,22 @@ join t1 t2 = T n' cs b'
   where
     m1     = index t1
     m2     = index t2
-    m'     = M.intersectionWith (\r1 r2 -> r1 ++ tail r2) m1 m2
+    m'     = M.intersectionWith (\r1 r2 -> r1 ++ myTail r2) m1 m2
     b'     = R <$> M.elems m'
     n'     = dim t1 + dim t2 - 1
-    cs     = cols t1 ++ tail (cols t2)
+    cs     = cols t1 ++ myTail (cols t2)
 
 index   :: Table -> M.Map Field [Field]
-index t = M.fromList [(head r, r) | r <- getRows t]
+index t = M.fromList [(myHead r, r) | r <- getRows t]
+
+
+myTail :: [a] -> [a]
+myTail (_:xs) = xs
+myTail _      = error "myTail!"
+
+myHead :: [a] -> a
+myHead (x:_) = x
+myHead _     = error "myHead!"
 
 
 -------------------------------------------------------------------
@@ -142,10 +153,10 @@ padJoin (R xs) t1 t2 = T n' cs b'
     m2     = index t2
     m1'    = M.difference m1 m2
     m2'    = M.mapWithKey (\k _ -> k:xs) m1
-    m'     = M.intersectionWith (\r1 r2 -> r1 ++ tail r2) m1 (M.union m2 m2')
+    m'     = M.intersectionWith (\r1 r2 -> r1 ++ myTail r2) m1 (M.union m2 m2')
     b'     = R <$> M.elems m'
     n'     = dim t1 + dim t2 - 1
-    cs     = (cols t1) ++ tail (cols t2)
+    cs     = cols t1 ++ myTail (cols t2)
 
 --------------------------------------------------------------------
 -- | Join two tables by any unique column, using default row for missing keys
@@ -159,13 +170,15 @@ padJoinBy c r t1 t2 = padJoin r t1' t2'
 --------------------------------------------------------------------------------
 --- | Index table by unique column
 --------------------------------------------------------------------------------
+uniqueBy :: Table -> Col -> Table
+uniqueBy t c = t { body = [ R fs | (_, fs) <- M.toList $ indexBy' True t c] }
 
 indexBy     :: Table -> Col -> Table
-indexBy t c = t { body = [ R fs | (_, fs) <- M.toList $ indexBy' t c] }
+indexBy t c = t { body = [ R fs | (_, fs) <- M.toList $ indexBy' False t c] }
 
-indexBy'       :: Table -> Col -> M.Map Field [Field]
-indexBy' t c
-  | ok        = M.fromList [ (r !! i, r) | r <- getRows t]
+indexBy'       :: Bool -> Table -> Col -> M.Map Field [Field]
+indexBy' force t c
+  | ok || force = M.fromList [ (r !! i, r) | r <- getRows t]
   | otherwise = error $ "indexBy: " ++ show c ++ " is not a unique column!"
   where
     i         = columnIndex t c
@@ -178,8 +191,10 @@ indexBy' t c
 isUnique      :: Table -> Col -> Bool
 isUnique t c  = not $ isDup $ project1 t c
 
+isDup :: [Field] -> Bool
 isDup xs      = length xs /= length xs' where xs' = nubOrd xs
 
+nubOrd :: [Field] -> [Field]
 nubOrd        = go . L.sort
   where
     go []     = []
@@ -202,6 +217,7 @@ project t cs = T n cs body'
     n        = length is
     is'      = L.sort is
 
+projRow :: [Int] -> Row -> Row
 projRow is (R xs) = R [ xs !! i | i <- is ]
 
 hide :: Table -> [Col] -> Table
@@ -242,4 +258,6 @@ addField (R fs) f = R (fs ++ [f])
 -------------------------------------------------------------------
 
 columnIndex     :: Table -> Col -> Int
-columnIndex t c = fromJust $ L.elemIndex c $ cols t
+columnIndex t c = case L.elemIndex c (cols t) of
+                    Just n  -> n
+                    Nothing -> error $ "columnIndex: missing column: " ++ show c

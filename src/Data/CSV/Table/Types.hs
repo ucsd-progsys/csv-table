@@ -105,6 +105,7 @@ fromFile  f = fromString f <$> readFile f
 fromString      :: FilePath -> String -> Table
 fromString fp s = fromCSV $ parseCSV' fp s
 
+parseCSV' :: FilePath -> String -> CSV
 parseCSV' fp s = case parseCSV fp s of
                    Right c -> c
                    Left e  -> error $ printf "parseCSV': %s" (show e)

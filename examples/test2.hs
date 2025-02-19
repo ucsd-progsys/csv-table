@@ -3,6 +3,36 @@ module AnalyzeLogs (collate) where
 import           Data.CSV.Table
 import           Text.CSV
 import qualified Data.List as L
+import System.FilePath ((</>))
+
+
+--------------------------------------------------------------------------------
+-- | Usage:
+--   ghci> let gh = "examples/wi25/github.csv"
+--   ghci> let fs = ["examples/wi25/wi25-00-lambda.csv", "examples/wi25/wi25-01-haskell.csv", "examples/wi25/wi25-02-random-art.csv"]
+--   ghci> collectGraderResults gh fs "examples/wi25/out.csv"
+--------------------------------------------------------------------------------
+collectResults :: FilePath -> IO ()
+collectResults dir = do
+  let gh = dir </> "github.csv"
+  let fs = (dir </>) <$> ["00-lambda.csv", "01-haskell.csv", "02-random-art.csv"]
+  collectGraderResults gh fs (dir </> "out.csv")
+
+--------------------------------------------------------------------------------
+
+collectGraderResults :: FilePath -> [FilePath] -> FilePath -> IO ()
+collectGraderResults ghFile resultFiles outFile = do
+  let col = C "github"
+  ghT   <- uniqueLoad col ghFile
+  resTs <- mapM (uniqueLoad col) resultFiles
+  let out = L.foldl' (addScore col)  ghT resTs
+  toFile outFile out
+
+addScore :: Col -> Table -> Table -> Table
+addScore col t1 t2 = joinBy col t1 (hide t2 [C "email"])
+
+uniqueLoad :: Col -> FilePath -> IO Table
+uniqueLoad c f = (`uniqueBy` c) <$> fromFile f
 
 -- | Usage:
 --      ghci> collate ["summary-1.csv", "summary-2.csv", ... , "summary-n.csv"] "out.csv"
